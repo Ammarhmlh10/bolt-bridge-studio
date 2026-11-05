@@ -31,7 +31,9 @@ use the editor.
 
 ## Project rules
 
-- App is an Arabic RTL, mobile-first web rebuild of a former Expo (Bolt) app; signed-in pages live under `src/routes/_authenticated/` (client-only gate), `/` only redirects. Why: the source had no public surface.
+- App is an Arabic RTL, mobile-first web rebuild of a former Expo (Bolt) app; signed-in pages live under `src/routes/_authenticated/` (client-only gate). Public marketing pages are top-level SSR routes wrapped in `src/components/site/SiteLayout.tsx`. Why: the signed-in app and the public site share one project but need different shells.
+- The phone-app HTTP API lives under `src/routes/api/public/v1/*`; every handler goes through `handle()` + `authenticate()` in `src/lib/api.server.ts` (Bearer user token, RLS as that user) and keeps logic in `src/lib/*.server.ts`. The web app calls the same endpoints via `src/lib/phone-api.ts`. Why: one tested contract for the native app and the web app; `/api/public` bypasses site auth so each handler must verify the caller.
+- Document → message rules (column detection, phone normalization, placeholder filling) live in pure `src/lib/message-prep.ts`, covered by `src/test/message-prep.test.ts`; uploads are parsed in memory and never stored. Why: same rules for every entry point, and customer files stay private.
 - Write every `createServerFn(...).middleware(...).validator(...).handler(...)` chain inline in `*.functions.ts`; never build it through a helper/factory. Why: the compiler only extracts direct chains, a factory makes the handler run in the browser.
 - Gateway API keys live only in `gateway_connection_secrets` (service-role only) and are read/written through `src/lib/hodhod.server.ts` after an ownership check; `gateway_connections.api_key` is deprecated and must stay NULL. Why: keys must never reach the browser.
 - Business limits (sender length, batch size, retries, template lengths, placeholder syntax) live in `src/lib/hodhod-rules.ts` and are covered by `src/test/hodhod-rules.test.ts`. Why: one source of truth for browser and server.

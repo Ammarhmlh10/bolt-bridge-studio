@@ -15,6 +15,13 @@
       "when": 1793907071653,
       "tag": "0001_move_gateway_keys_to_secret_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793908181635,
+      "tag": "0002_create_message_batches_and_contact",
+      "breakpoints": true
     }
   ]
 }

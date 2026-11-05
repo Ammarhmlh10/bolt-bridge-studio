@@ -112,6 +112,30 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          message: string
+          name: string
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          id?: string
+          message: string
+          name: string
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          message?: string
+          name?: string
+        }
+        Relationships: []
+      }
       gateway_connection_secrets: {
         Row: {
           api_key: string
@@ -216,6 +240,65 @@ export type Database = {
         }
         Relationships: []
       }
+      message_batches: {
+        Row: {
+          created_at: string
+          failed_count: number
+          id: string
+          ready_count: number
+          sent_count: number
+          skipped_count: number
+          source_name: string
+          source_type: string
+          status: string
+          template_id: string | null
+          template_title: string
+          total_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          ready_count?: number
+          sent_count?: number
+          skipped_count?: number
+          source_name?: string
+          source_type: string
+          status?: string
+          template_id?: string | null
+          template_title?: string
+          total_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          ready_count?: number
+          sent_count?: number
+          skipped_count?: number
+          source_name?: string
+          source_type?: string
+          status?: string
+          template_id?: string | null
+          template_title?: string
+          total_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_batches_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_templates: {
         Row: {
           body: string
@@ -242,6 +325,65 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      prepared_messages: {
+        Row: {
+          batch_id: string
+          body: string
+          created_at: string
+          email: string | null
+          error: string | null
+          id: string
+          phone: string | null
+          position: number
+          recipient_name: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          variables: Json
+        }
+        Insert: {
+          batch_id: string
+          body: string
+          created_at?: string
+          email?: string | null
+          error?: string | null
+          id?: string
+          phone?: string | null
+          position: number
+          recipient_name?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          variables?: Json
+        }
+        Update: {
+          batch_id?: string
+          body?: string
+          created_at?: string
+          email?: string | null
+          error?: string | null
+          id?: string
+          phone?: string | null
+          position?: number
+          recipient_name?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prepared_messages_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "message_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

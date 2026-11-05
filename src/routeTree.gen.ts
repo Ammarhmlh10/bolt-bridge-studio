@@ -12,11 +12,22 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DownloadRouteImport } from './routes/download'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
+import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents.index'
+import { Route as AuthenticatedDocumentsBatchIdRouteImport } from './routes/_authenticated/documents.$batchId'
+import { Route as ApiPublicV1HealthRouteImport } from './routes/api/public/v1/health'
+import { Route as ApiPublicV1TemplatesRouteImport } from './routes/api/public/v1/templates'
+import { Route as ApiPublicV1BatchesIndexRouteImport } from './routes/api/public/v1/batches/index'
+import { Route as ApiPublicV1DocumentsParseRouteImport } from './routes/api/public/v1/documents/parse'
+import { Route as ApiPublicV1BatchesBatchIdIndexRouteImport } from './routes/api/public/v1/batches/$batchId/index'
+import { Route as ApiPublicV1BatchesBatchIdReportRouteImport } from './routes/api/public/v1/batches/$batchId/report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +41,21 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -57,72 +83,192 @@ const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
   path: '/templates',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDocumentsIndexRoute =
+  AuthenticatedDocumentsIndexRouteImport.update({
+    id: '/documents/',
+    path: '/documents/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDocumentsBatchIdRoute =
+  AuthenticatedDocumentsBatchIdRouteImport.update({
+    id: '/documents/$batchId',
+    path: '/documents/$batchId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicV1HealthRoute = ApiPublicV1HealthRouteImport.update({
+  id: '/api/public/v1/health',
+  path: '/api/public/v1/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1TemplatesRoute = ApiPublicV1TemplatesRouteImport.update({
+  id: '/api/public/v1/templates',
+  path: '/api/public/v1/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1BatchesIndexRoute = ApiPublicV1BatchesIndexRouteImport.update({
+  id: '/api/public/v1/batches/',
+  path: '/api/public/v1/batches/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1DocumentsParseRoute =
+  ApiPublicV1DocumentsParseRouteImport.update({
+    id: '/api/public/v1/documents/parse',
+    path: '/api/public/v1/documents/parse',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1BatchesBatchIdIndexRoute =
+  ApiPublicV1BatchesBatchIdIndexRouteImport.update({
+    id: '/api/public/v1/batches/$batchId/',
+    path: '/api/public/v1/batches/$batchId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1BatchesBatchIdReportRoute =
+  ApiPublicV1BatchesBatchIdReportRouteImport.update({
+    id: '/api/public/v1/batches/$batchId/report',
+    path: '/api/public/v1/batches/$batchId/report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/download': typeof DownloadRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/home': typeof AuthenticatedHomeRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
+  '/documents/': typeof AuthenticatedDocumentsIndexRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/templates': typeof ApiPublicV1TemplatesRoute
+  '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
+  '/api/public/v1/batches/': typeof ApiPublicV1BatchesIndexRoute
+  '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId/': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/download': typeof DownloadRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/home': typeof AuthenticatedHomeRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
+  '/documents': typeof AuthenticatedDocumentsIndexRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/templates': typeof ApiPublicV1TemplatesRoute
+  '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
+  '/api/public/v1/batches': typeof ApiPublicV1BatchesIndexRoute
+  '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/download': typeof DownloadRoute
+  '/pricing': typeof PricingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/_authenticated/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
+  '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
+  '/api/public/v1/health': typeof ApiPublicV1HealthRoute
+  '/api/public/v1/templates': typeof ApiPublicV1TemplatesRoute
+  '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
+  '/api/public/v1/batches/': typeof ApiPublicV1BatchesIndexRoute
+  '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId/': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/contact'
+    | '/download'
+    | '/pricing'
     | '/reset-password'
     | '/campaigns'
     | '/home'
     | '/settings'
     | '/templates'
+    | '/documents/$batchId'
+    | '/documents/'
+    | '/api/public/v1/health'
+    | '/api/public/v1/templates'
+    | '/api/public/v1/documents/parse'
+    | '/api/public/v1/batches/'
+    | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/contact'
+    | '/download'
+    | '/pricing'
     | '/reset-password'
     | '/campaigns'
     | '/home'
     | '/settings'
     | '/templates'
+    | '/documents/$batchId'
+    | '/documents'
+    | '/api/public/v1/health'
+    | '/api/public/v1/templates'
+    | '/api/public/v1/documents/parse'
+    | '/api/public/v1/batches'
+    | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/contact'
+    | '/download'
+    | '/pricing'
     | '/reset-password'
     | '/_authenticated/campaigns'
     | '/_authenticated/home'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
+    | '/_authenticated/documents/$batchId'
+    | '/_authenticated/documents/'
+    | '/api/public/v1/health'
+    | '/api/public/v1/templates'
+    | '/api/public/v1/documents/parse'
+    | '/api/public/v1/batches/'
+    | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
+  DownloadRoute: typeof DownloadRoute
+  PricingRoute: typeof PricingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicV1HealthRoute: typeof ApiPublicV1HealthRoute
+  ApiPublicV1TemplatesRoute: typeof ApiPublicV1TemplatesRoute
+  ApiPublicV1DocumentsParseRoute: typeof ApiPublicV1DocumentsParseRoute
+  ApiPublicV1BatchesIndexRoute: typeof ApiPublicV1BatchesIndexRoute
+  ApiPublicV1BatchesBatchIdReportRoute: typeof ApiPublicV1BatchesBatchIdReportRoute
+  ApiPublicV1BatchesBatchIdIndexRoute: typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,6 +292,27 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -183,6 +350,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/documents/': {
+      id: '/_authenticated/documents/'
+      path: '/documents'
+      fullPath: '/documents/'
+      preLoaderRoute: typeof AuthenticatedDocumentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documents/$batchId': {
+      id: '/_authenticated/documents/$batchId'
+      path: '/documents/$batchId'
+      fullPath: '/documents/$batchId'
+      preLoaderRoute: typeof AuthenticatedDocumentsBatchIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/v1/health': {
+      id: '/api/public/v1/health'
+      path: '/api/public/v1/health'
+      fullPath: '/api/public/v1/health'
+      preLoaderRoute: typeof ApiPublicV1HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/templates': {
+      id: '/api/public/v1/templates'
+      path: '/api/public/v1/templates'
+      fullPath: '/api/public/v1/templates'
+      preLoaderRoute: typeof ApiPublicV1TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/batches/': {
+      id: '/api/public/v1/batches/'
+      path: '/api/public/v1/batches'
+      fullPath: '/api/public/v1/batches/'
+      preLoaderRoute: typeof ApiPublicV1BatchesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/documents/parse': {
+      id: '/api/public/v1/documents/parse'
+      path: '/api/public/v1/documents/parse'
+      fullPath: '/api/public/v1/documents/parse'
+      preLoaderRoute: typeof ApiPublicV1DocumentsParseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/batches/$batchId/': {
+      id: '/api/public/v1/batches/$batchId/'
+      path: '/api/public/v1/batches/$batchId'
+      fullPath: '/api/public/v1/batches/$batchId/'
+      preLoaderRoute: typeof ApiPublicV1BatchesBatchIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/batches/$batchId/report': {
+      id: '/api/public/v1/batches/$batchId/report'
+      path: '/api/public/v1/batches/$batchId/report'
+      fullPath: '/api/public/v1/batches/$batchId/report'
+      preLoaderRoute: typeof ApiPublicV1BatchesBatchIdReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -191,6 +414,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
+  AuthenticatedDocumentsBatchIdRoute: typeof AuthenticatedDocumentsBatchIdRoute
+  AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -198,6 +423,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
+  AuthenticatedDocumentsBatchIdRoute: AuthenticatedDocumentsBatchIdRoute,
+  AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -207,7 +434,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
+  DownloadRoute: DownloadRoute,
+  PricingRoute: PricingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicV1HealthRoute: ApiPublicV1HealthRoute,
+  ApiPublicV1TemplatesRoute: ApiPublicV1TemplatesRoute,
+  ApiPublicV1DocumentsParseRoute: ApiPublicV1DocumentsParseRoute,
+  ApiPublicV1BatchesIndexRoute: ApiPublicV1BatchesIndexRoute,
+  ApiPublicV1BatchesBatchIdReportRoute: ApiPublicV1BatchesBatchIdReportRoute,
+  ApiPublicV1BatchesBatchIdIndexRoute: ApiPublicV1BatchesBatchIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ChevronLeft, ClipboardList, Layers } from "lucide-react";
+import { ChevronLeft, ClipboardList, FileUp, Layers } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/app/ui-bits";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 });
 
-function MenuCard({ to, title, description, Icon }: { to: "/templates" | "/campaigns"; title: string; description: string; Icon: LucideIcon }) {
+function MenuCard({ to, title, description, Icon }: { to: "/templates" | "/campaigns" | "/documents"; title: string; description: string; Icon: LucideIcon }) {
   return (
     <Link
       to={to}
@@ -47,6 +47,12 @@ function HomePage() {
           title="الرسائل الجاهزة"
           description="إدارة الرسائل المحفوظة مسبقاً ومراجعتها وإرسالها"
           Icon={ClipboardList}
+        />
+        <MenuCard
+          to="/documents"
+          title="تجهيز الرسائل من المستندات"
+          description="ارفع ملف Excel أو CSV أو فاتورة PDF لتجهيز رسالة لكل عميل"
+          Icon={FileUp}
         />
         <MenuCard
           to="/campaigns"

@@ -11,10 +11,18 @@ export const MAX_CAMPAIGN_NAME = 200;
 
 export const GENERIC_ERROR = "تعذر الاتصال بالخادم. حاول مرة أخرى.";
 
+// Placeholder names may use Latin or Arabic letters, digits and underscores: {{name}} or {{الاسم}}.
+const PLACEHOLDER_RE = /\{\{\s*([\p{L}\p{N}_]+)\s*\}\}/gu;
+
+// Document processing limits (phone app uploads and web uploads share them).
+export const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+export const MAX_ROWS_PER_BATCH = 2000;
+export const MAX_BATCHES_LISTED = 50;
+
 export function extractPlaceholders(body: string): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
-  for (const match of body.matchAll(/\{\{\s*(\w+)\s*\}\}/g)) {
+  for (const match of body.matchAll(PLACEHOLDER_RE)) {
     const name = match[1];
     if (name && !seen.has(name)) {
       seen.add(name);
@@ -25,7 +33,7 @@ export function extractPlaceholders(body: string): string[] {
 }
 
 export function replacePlaceholders(template: string, data: Record<string, string>): string {
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, key: string) =>
+  return template.replace(PLACEHOLDER_RE, (_m, key: string) =>
     data[key] !== undefined ? data[key] : "",
   );
 }
