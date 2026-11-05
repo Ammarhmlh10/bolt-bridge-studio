@@ -16,7 +16,7 @@ export function extractPlaceholders(body: string): string[] {
   const result: string[] = [];
   for (const match of body.matchAll(/\{\{\s*(\w+)\s*\}\}/g)) {
     const name = match[1];
-    if (!seen.has(name)) {
+    if (name && !seen.has(name)) {
       seen.add(name);
       result.push(name);
     }
@@ -75,18 +75,19 @@ export type Subscriber = { email: string; name: string };
 /** Accepts an array, { data: [...] } or { subscribers: [...] } response from the HodHod API. */
 export function parseSubscribers(payload: unknown): Subscriber[] {
   const obj = (payload ?? {}) as Record<string, unknown>;
-  const items = Array.isArray(payload)
+  const items: unknown[] = Array.isArray(payload)
     ? payload
-    : Array.isArray(obj.data)
-      ? obj.data
-      : Array.isArray(obj.subscribers)
-        ? obj.subscribers
+    : Array.isArray(obj["data"])
+      ? (obj["data"] as unknown[])
+      : Array.isArray(obj["subscribers"])
+        ? (obj["subscribers"] as unknown[])
         : [];
   const result: Subscriber[] = [];
-  for (const raw of items as Record<string, unknown>[]) {
-    if (!raw || typeof raw !== "object") continue;
-    const email = raw.email ?? raw.address ?? "";
-    const name = raw.name ?? raw.subscriber_name ?? raw.full_name ?? "";
+  for (const item of items) {
+    if (!item || typeof item !== "object") continue;
+    const raw = item as Record<string, unknown>;
+    const email = raw["email"] ?? raw["address"] ?? "";
+    const name = raw["name"] ?? raw["subscriber_name"] ?? raw["full_name"] ?? "";
     if (email) result.push({ email: String(email), name: String(name || "") });
   }
   return result;

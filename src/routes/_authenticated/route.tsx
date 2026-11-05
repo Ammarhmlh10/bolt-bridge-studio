@@ -41,8 +41,7 @@ function NavTab({ tab, active }: { tab: Tab; active: boolean }) {
   return (
     <Link
       to={tab.to}
-      role="tab"
-      aria-selected={active}
+      aria-current={active ? "page" : undefined}
       aria-label={tab.label}
       className={cn(
         "flex flex-1 flex-col items-center gap-1 py-1 text-xs font-semibold transition-colors",
@@ -62,7 +61,7 @@ function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 pb-[max(env(safe-area-inset-bottom),8px)]">
       <div className="mx-auto max-w-xl px-3">
-        <div role="tablist" className="flex items-end rounded-[24px] border bg-card px-2 pb-2 pt-2 shadow-nav">
+        <div className="flex items-end rounded-[24px] border bg-card px-2 pb-2 pt-2 shadow-nav">
           {TABS_START.map((t) => (
             <NavTab key={t.to} tab={t} active={pathname === t.to} />
           ))}

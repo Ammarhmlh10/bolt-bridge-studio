@@ -72,8 +72,8 @@ export function Field({
 }: {
   label: string;
   Icon: LucideIcon;
-  hint?: string;
-  htmlFor?: string;
+  hint?: string | undefined;
+  htmlFor?: string | undefined;
   children: ReactNode;
 }) {
   return (
