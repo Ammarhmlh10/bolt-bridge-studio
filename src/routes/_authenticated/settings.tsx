@@ -130,7 +130,6 @@ function SettingsPage() {
       <Card>
         <SectionTitle>إعدادات الإرسال</SectionTitle>
         <SendingPreferencesForm
-          key={settings.updated_at}
           initial={settings}
           onSaved={(s) => queryClient.setQueryData(gatewayQuery.queryKey, s)}
         />

@@ -18,14 +18,31 @@ export async function loadConnectionSecret(
   connectionId: string,
 ): Promise<ConnectionSecret | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data: conn, error } = await supabaseAdmin
     .from("gateway_connections")
-    .select("id, endpoint_url, sender_name, api_key")
+    .select("id, endpoint_url, sender_name")
     .eq("id", connectionId)
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw error;
-  return data;
+  if (!conn) return null;
+  const { data: secret, error: secretError } = await supabaseAdmin
+    .from("gateway_connection_secrets")
+    .select("api_key")
+    .eq("connection_id", conn.id)
+    .maybeSingle();
+  if (secretError) throw secretError;
+  if (!secret) return null;
+  return { ...conn, api_key: secret.api_key };
+}
+
+/** Stores the API key for a connection the caller has already been verified to own. */
+export async function saveConnectionSecret(connectionId: string, apiKey: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin
+    .from("gateway_connection_secrets")
+    .upsert({ connection_id: connectionId, api_key: apiKey }, { onConflict: "connection_id" });
+  if (error) throw error;
 }
 
 function assertPublicHost(endpointUrl: string): URL {

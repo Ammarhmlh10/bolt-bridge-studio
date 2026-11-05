@@ -14,7 +14,7 @@ import {
   normalizeEndpoint,
   normalizeSender,
 } from "./hodhod-rules";
-import { loadConnectionSecret, probeEndpoint } from "./hodhod.server";
+import { loadConnectionSecret, probeEndpoint, saveConnectionSecret } from "./hodhod.server";
 
 export type GatewayConnection = {
   id: string;
@@ -37,9 +37,6 @@ const SENDER_ERROR = `اسم المرسل يجب أن يكون بين 1 و ${MAX
 const NOT_FOUND = "الخدمة غير موجودة";
 
 type AuthedClient = SupabaseClient<Database>;
-function authedFn() {
-  return createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]);
-}
 
 async function loadSettings(supabase: AuthedClient, userId: string): Promise<GatewaySettings> {
   let { data: prefs, error } = await supabase
@@ -74,8 +71,9 @@ export const getGatewaySettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => loadSettings(context.supabase, context.userId));
 
-export const createGatewayConnection = authedFn()
-  .inputValidator((input) =>
+export const createGatewayConnection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input) =>
     z.object({ endpoint_url: z.string(), sender_name: z.string(), api_key: z.string() }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -87,15 +85,22 @@ export const createGatewayConnection = authedFn()
     if (!key) throw new Error("أدخل مفتاح الربط");
     const { data: row, error } = await context.supabase
       .from("gateway_connections")
-      .insert({ endpoint_url: endpoint, sender_name: sender, api_key: key, user_id: context.userId })
+      .insert({ endpoint_url: endpoint, sender_name: sender, user_id: context.userId })
       .select(PUBLIC_COLUMNS)
       .single();
     if (error) throw error;
+    try {
+      await saveConnectionSecret(row.id, key);
+    } catch (err) {
+      await context.supabase.from("gateway_connections").delete().eq("id", row.id);
+      throw err;
+    }
     return row as GatewayConnection;
   });
 
-export const updateGatewayConnection = authedFn()
-  .inputValidator((input) =>
+export const updateGatewayConnection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input) =>
     z
       .object({
         id: z.string().uuid(),
@@ -106,7 +111,7 @@ export const updateGatewayConnection = authedFn()
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const changes: { endpoint_url?: string; sender_name?: string; api_key?: string } = {};
+    const changes: { endpoint_url?: string; sender_name?: string } = {};
     if (data.endpoint_url !== undefined) {
       const endpoint = normalizeEndpoint(data.endpoint_url);
       if (!endpoint) throw new Error(ENDPOINT_ERROR);
@@ -117,21 +122,22 @@ export const updateGatewayConnection = authedFn()
       if (!sender) throw new Error(SENDER_ERROR);
       changes.sender_name = sender;
     }
-    if (data.api_key && data.api_key.trim()) changes.api_key = data.api_key.trim();
-
+    // RLS limits the update to the caller's own row; no row back means not found / not owned.
     const { data: row, error } = await context.supabase
       .from("gateway_connections")
-      .update(changes)
+      .update({ ...changes, updated_at: new Date().toISOString() })
       .eq("id", data.id)
       .select(PUBLIC_COLUMNS)
       .maybeSingle();
     if (error) throw error;
     if (!row) throw new Error(NOT_FOUND);
+    if (data.api_key && data.api_key.trim()) await saveConnectionSecret(row.id, data.api_key.trim());
     return row as GatewayConnection;
   });
 
-export const deleteGatewayConnection = authedFn()
-  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+export const deleteGatewayConnection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("gateway_connections")
@@ -143,16 +149,18 @@ export const deleteGatewayConnection = authedFn()
     return { deleted: true, id: data.id };
   });
 
-export const testGatewayConnection = authedFn()
-  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+export const testGatewayConnection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const conn = await loadConnectionSecret(context.userId, data.id);
     if (!conn) throw new Error(NOT_FOUND);
     return probeEndpoint(conn.endpoint_url);
   });
 
-export const saveSendingPreferences = authedFn()
-  .inputValidator((input) => z.object({ batch_size: z.number(), max_retries: z.number() }).parse(input))
+export const saveSendingPreferences = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input) => z.object({ batch_size: z.number(), max_retries: z.number() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!isIntegerInRange(data.batch_size, BATCH_SIZE_RANGE)) {
       throw new Error(`عدد الرسائل في الدفعة يجب أن يكون بين ${BATCH_SIZE_RANGE.min} و ${BATCH_SIZE_RANGE.max}`);

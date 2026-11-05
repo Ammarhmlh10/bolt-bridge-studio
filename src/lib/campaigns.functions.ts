@@ -50,7 +50,7 @@ export const listCampaigns = createServerFn({ method: "GET" })
 
 export const fetchSubscribers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ connection_id: z.string().uuid() }).parse(input))
+  .validator((input) => z.object({ connection_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }): Promise<Subscriber[]> => {
     const conn = await loadConnectionSecret(context.userId, data.connection_id);
     if (!conn) throw new Error("الخدمة غير موجودة");
@@ -59,7 +59,7 @@ export const fetchSubscribers = createServerFn({ method: "POST" })
 
 export const sendCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         connection_id: z.string().uuid(),

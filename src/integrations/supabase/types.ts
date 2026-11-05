@@ -112,9 +112,35 @@ export type Database = {
           },
         ]
       }
-      gateway_connections: {
+      gateway_connection_secrets: {
         Row: {
           api_key: string
+          connection_id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          connection_id: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          connection_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gateway_connection_secrets_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: true
+            referencedRelation: "gateway_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_connections: {
+        Row: {
+          api_key: string | null
           created_at: string
           endpoint_url: string
           id: string
@@ -123,7 +149,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          api_key: string
+          api_key?: string | null
           created_at?: string
           endpoint_url: string
           id?: string
@@ -132,7 +158,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
-          api_key?: string
+          api_key?: string | null
           created_at?: string
           endpoint_url?: string
           id?: string

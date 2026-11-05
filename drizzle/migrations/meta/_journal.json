@@ -8,6 +8,13 @@
       "when": 1793906029023,
       "tag": "0000_create_hodhod_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793907071653,
+      "tag": "0001_move_gateway_keys_to_secret_table",
+      "breakpoints": true
     }
   ]
 }

@@ -28,3 +28,11 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- App is an Arabic RTL, mobile-first web rebuild of a former Expo (Bolt) app; signed-in pages live under `src/routes/_authenticated/` (client-only gate), `/` only redirects. Why: the source had no public surface.
+- Write every `createServerFn(...).middleware(...).validator(...).handler(...)` chain inline in `*.functions.ts`; never build it through a helper/factory. Why: the compiler only extracts direct chains, a factory makes the handler run in the browser.
+- Gateway API keys live only in `gateway_connection_secrets` (service-role only) and are read/written through `src/lib/hodhod.server.ts` after an ownership check; `gateway_connections.api_key` is deprecated and must stay NULL. Why: keys must never reach the browser.
+- Business limits (sender length, batch size, retries, template lengths, placeholder syntax) live in `src/lib/hodhod-rules.ts` and are covered by `src/test/hodhod-rules.test.ts`. Why: one source of truth for browser and server.
+- `legacy_user_map` (service-role only) holds original Bolt user IDs → new user IDs for the pending user import. Why: imported records must be re-owned only after verified email match.
