@@ -1,0 +1,21 @@
+{
+  "source": "bolt",
+  "source_stack": "Expo (React Native + expo-router) with Supabase; Arabic RTL app 'هدهد الفواتير'",
+  "target_stack": "TanStack Start web app (mobile-first) with Lovable Cloud",
+  "capabilities": [
+    { "capability": "code: screens (home, campaigns, templates, settings, login, not-found)", "source": "app/**", "outcome": "rebuild as web routes with bottom navigation, RTL Arabic UI", "status": "in_progress", "next_action": "build routes" },
+    { "capability": "schema: message_templates, gateway_connections, gateway_settings, campaigns, campaign_recipients", "source": "supabase/migrations/*.sql", "outcome": "migrate", "status": "in_progress", "next_action": "create final-state schema with owner-scoped RLS" },
+    { "capability": "records: application table rows", "source": "Bolt Supabase database", "outcome": "migrate", "status": "pending", "next_action": "request CSV/JSON exports of all 5 tables after preview" },
+    { "capability": "auth identities: Supabase email/password users", "source": "auth.users", "outcome": "migrate", "status": "pending", "next_action": "request user export (emails + original IDs); first-login email verification and new password" },
+    { "capability": "authorization: per-user isolation via auth.uid() = user_id", "source": "RLS policies", "outcome": "migrate", "status": "in_progress", "next_action": "recreate policies; verify cross-user isolation" },
+    { "capability": "server: gateway-settings edge function (list/create/update/delete/test connections, save preferences)", "source": "supabase/functions/gateway-settings", "outcome": "migrate to authenticated server functions", "status": "in_progress", "next_action": "implement" },
+    { "capability": "server: hoodhad-send edge function (fetch HodHod subscribers, send campaign in batches with retries)", "source": "supabase/functions/hoodhad-send", "outcome": "migrate to authenticated server functions", "status": "in_progress", "next_action": "implement" },
+    { "capability": "external provider: HodHod / SMS gateway endpoints", "source": "per-user endpoint_url + api_key stored in gateway_connections", "outcome": "preserve (user-entered per connection, no app-level secret)", "status": "in_progress", "next_action": "verify with a real connection after user adds one" },
+    { "capability": "storage objects", "source": "none detected", "outcome": "not applicable", "status": "verified", "next_action": "none" },
+    { "capability": "realtime, schedules, webhooks, public endpoints", "source": "none detected", "outcome": "not applicable", "status": "verified", "next_action": "none" },
+    { "capability": "secrets", "source": "EXPO_PUBLIC_SUPABASE_*, SUPABASE_* (old backend only)", "outcome": "replaced by Lovable Cloud; no user-owned secrets needed", "status": "verified", "next_action": "none" },
+    { "capability": "native-only features (expo-camera, haptics, splash)", "source": "package.json (unused in screens)", "outcome": "not applicable on web", "status": "verified", "next_action": "none" },
+    { "capability": "cutover", "source": "Bolt app", "outcome": "user switches to Lovable URL after data import", "status": "pending", "next_action": "after records/users imported" },
+    { "capability": "verification", "source": "-", "outcome": "build, sign-in, template CRUD, connection CRUD, campaign flow", "status": "pending", "next_action": "run after build" }
+  ]
+}

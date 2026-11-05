@@ -1,23 +1,28 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { supabase } from "@/integrations/supabase/client";
+import { Spinner } from "@/components/app/ui-bits";
+
+// Session-aware entry: signed-in users go to the main menu, others to sign-in.
 export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "هدهد الفواتير — إرسال رسائل الفواتير" },
+      { name: "description", content: "جهّز قوالب الرسائل واربط خدمة الإرسال وأرسل فواتيرك لمشتركيك دفعة واحدة." },
+      { property: "og:title", content: "هدهد الفواتير" },
+      { property: "og:description", content: "أرسل رسائل الفواتير لمشتركيك بخطوات بسيطة." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    throw redirect({ to: data.user ? "/home" : "/auth", replace: true });
+  },
+  component: () => (
+    <div className="flex min-h-screen items-center justify-center">
+      <Spinner />
     </div>
-  );
-}
+  ),
+});
