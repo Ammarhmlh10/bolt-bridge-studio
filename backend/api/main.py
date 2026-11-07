@@ -18,6 +18,7 @@ from backend.models.schemas import (
 from backend.services.document_parser import DocumentParser
 from backend.services.message_service import MessageService
 from backend.ai.engine import SmartAnalysisEngine
+from supabase import create_client
 
 
 # =====================
@@ -41,6 +42,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize Supabase client for JWT verification
+supabase_client = create_client(settings.supabase_url, settings.supabase_anon_key)
+
 # Initialize services
 db = Database(settings.supabase_url, settings.supabase_anon_key)
 # Use anon key as fallback if service role key is not available
@@ -56,18 +60,27 @@ ai_engine = SmartAnalysisEngine(settings.ai_confidence_threshold)
 # =====================
 
 async def get_current_user(authorization: Optional[str] = Header(None)) -> str:
-    """Extract user ID from authorization header"""
+    """Extract user ID from authorization header (JWT validation)"""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authentication required")
     
-    # In production, validate JWT and extract user_id
-    # For now, return a test user_id (UUID format for Supabase)
-    # This should be replaced with actual JWT validation in production
     token = authorization.replace("Bearer ", "")
     
-    # Generate a consistent test UUID based on token
-    # For testing, use a fixed UUID - in production use proper JWT validation
-    return "00000000-0000-0000-0000-000000000001"
+    try:
+        # Verify the token with Supabase
+        user = supabase_client.auth.get_user(token)
+        
+        if not user or not user.user:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        
+        return user.user.id
+    except HTTPException:
+        raise
+    except Exception as e:
+        # For other errors, return a test user_id for development
+        if settings.debug:
+            return "00000000-0000-0000-0000-000000000001"
+        raise HTTPException(status_code=401, detail="Invalid authentication token")
 
 
 # =====================
