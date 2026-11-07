@@ -119,6 +119,9 @@ const PHONE_PATTERNS = [
 
 const EMAIL_PATTERN = /^[\w.-]+@[\w.-]+\.\w+$/;
 
+// Arabic text ranges
+const ARABIC_RANGE = '\u0600-\u06FF\u0750-\u077F';
+
 function analyzeColumn(name: string, values: string[]): ColumnInfo {
   const samples = values.slice(0, 10).filter(v => v && v.trim());
   const total = values.length;
@@ -141,21 +144,20 @@ function analyzeColumn(name: string, values: string[]): ColumnInfo {
     // Email check
     if (EMAIL_PATTERN.test(value)) emailCount++;
     
-    // Number check
-    const numValue = value.replace(/[.,ريال$]/g, '').trim();
+    // Number check (including Arabic numerals)
+    const numValue = value.replace(/[.,ريال٠-٩$]/g, '').trim();
     if (/^\d+(\.\d+)?$/.test(numValue)) numberCount++;
     
-    // Name indicators
+    // Name indicators (English and Arabic)
     const lowerName = name.toLowerCase();
-    if (lowerName.includes('name') || lowerName.includes('الاسم') || 
-        lowerName.includes('customer') || lowerName.includes('client') ||
-        lowerName.includes('مشتري') || lowerName.includes('عميل')) {
+    const arabicNameIndicators = ['الاسم', 'اسم', 'مشتري', 'عميل', 'زبون', 'customer', 'client', 'name', 'client'];
+    if (arabicNameIndicators.some(ind => lowerName.includes(ind.toLowerCase()))) {
       nameIndicators++;
     }
   }
 
   const count = samples.length;
-  const name = name.toLowerCase();
+  const nameLower = name.toLowerCase();
 
   // Determine type
   let type: ColumnInfo['type'] = 'text';
@@ -167,13 +169,13 @@ function analyzeColumn(name: string, values: string[]): ColumnInfo {
   } else if (emailCount / count >= 0.5) {
     type = 'email';
     confidence = emailCount / count;
-  } else if (nameIndicators > 0 || name.includes('name') || name.includes('الاسم')) {
+  } else if (nameIndicators > 0 || nameLower.includes('name') || nameLower.includes('الاسم')) {
     type = 'name';
     confidence = 0.8;
   } else if (numberCount / count >= 0.5) {
-    if (name.includes('amount') || name.includes('المبلغ') || name.includes('سعر') || name.includes('total')) {
+    if (nameLower.includes('amount') || nameLower.includes('المبلغ') || nameLower.includes('سعر') || nameLower.includes('total')) {
       type = 'amount';
-    } else if (name.includes('date') || name.includes('التاريخ')) {
+    } else if (nameLower.includes('date') || nameLower.includes('التاريخ')) {
       type = 'date';
     } else {
       type = 'text';
@@ -251,14 +253,14 @@ export function suggestMapping(
   const mappings: VariableMapping[] = [];
 
   for (const variable of variables) {
-    const varLower = variable.toLowerCase().replace('_', '');
+    const varLower = variable.toLowerCase().replace(/[_\s]/g, '');
     
     // Try to find matching column
     let bestMatch = '';
     let bestConfidence = 0;
 
     for (const column of columns) {
-      const colLower = column.toLowerCase().replace('_', '').replace(/\s/g, '');
+      const colLower = column.toLowerCase().replace(/[_\s]/g, '');
       const info = columnInfo[column];
       
       // Exact match
@@ -276,17 +278,25 @@ export function suggestMapping(
         }
       }
       
-      // Type-based matching
+      // Type-based matching (English and Arabic)
       const expectedTypes: Record<string, ColumnInfo['type'][]> = {
         'name': ['name', 'text'],
-        'phone': ['phone'],
+        'phone': ['phone', 'text'],
+        'mobile': ['phone', 'text'],
         'email': ['email'],
         'amount': ['amount'],
+        'total': ['amount'],
+        'price': ['amount'],
         'date': ['date'],
         'الاسم': ['name', 'text'],
-        'الجوال': ['phone'],
+        'الجوال': ['phone', 'text'],
+        'الهاتف': ['phone', 'text'],
+        'الموبايل': ['phone', 'text'],
         'المبلغ': ['amount'],
         'التاريخ': ['date'],
+        'invoice': ['text'],
+        'رقم_الفاتورة': ['text'],
+        'رقم_الطلب': ['text'],
       };
 
       const types = expectedTypes[variable] || expectedTypes[varLower] || [];
