@@ -9,6 +9,8 @@ import { MAX_ROWS_PER_BATCH } from "@/lib/hodhod-rules";
 const jsonBody = z.object({
   template_id: z.string().uuid(),
   source_name: z.string().trim().max(255).optional(),
+  // Set when the records came from POST /documents/parse, so the batch keeps the original file type.
+  source_type: z.enum(["csv", "xlsx", "pdf", "json"]).optional(),
   records: z
     .array(z.record(z.union([z.string().max(2000), z.number(), z.boolean(), z.null()])))
     .min(1)
@@ -52,7 +54,7 @@ export const Route = createFileRoute("/api/public/v1/batches/")({
           const result = await createBatch(ctx, {
             templateId: parsed.data.template_id,
             sourceName: parsed.data.source_name ?? "بيانات من التطبيق",
-            sourceType: "json",
+            sourceType: parsed.data.source_type ?? "json",
             records: parsed.data.records,
           });
           return json(result, 201);

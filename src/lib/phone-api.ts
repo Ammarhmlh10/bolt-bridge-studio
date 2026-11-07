@@ -61,6 +61,54 @@ export function createBatchFromFile(file: File, templateId: string) {
   });
 }
 
+export type ParsedDocument = {
+  source_type: "csv" | "xlsx" | "pdf";
+  source_name: string;
+  columns: string[];
+  records: Record<string, string>[];
+  count: number;
+  detected_fields: Partial<Record<"name" | "phone" | "email" | "amount" | "invoice_number" | "due_date", string>>;
+};
+
+/** Reads a document on the server and returns its rows (nothing is saved). */
+export function parseDocument(file: File) {
+  const form = new FormData();
+  form.set("file", file);
+  return apiFetch<ParsedDocument>("/documents/parse", { method: "POST", body: form });
+}
+
+/** Prepares a batch from rows already read by parseDocument (avoids reading the file twice). */
+export function createBatchFromRecords(doc: ParsedDocument, templateId: string) {
+  return apiFetch<{ batch: Batch; messages: BatchMessage[]; missing_variables: string[] }>("/batches", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      template_id: templateId,
+      source_name: doc.source_name,
+      source_type: doc.source_type,
+      records: doc.records,
+    }),
+  });
+}
+
+export type ReportItem = { id: string; status: "sent" | "failed" | "pending"; error?: string };
+
+export function reportResults(batchId: string, results: ReportItem[]) {
+  return apiFetch<{ updated: number; ignored: number; batch: Batch }>(`/batches/${batchId}/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ results }),
+  });
+}
+
+export function sendNextChunkViaGateway(batchId: string, connectionId: string) {
+  return apiFetch<{ sent: number; failed: number; remaining: number; batch: Batch }>(`/batches/${batchId}/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ connection_id: connectionId }),
+  });
+}
+
 export function deleteBatch(id: string) {
   return apiFetch<{ deleted: true }>(`/batches/${id}`, { method: "DELETE" });
 }

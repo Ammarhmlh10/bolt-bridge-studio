@@ -2,7 +2,16 @@
 import { z } from "zod";
 
 import { ApiError, type AuthedContext } from "./api.server";
-import { MAX_BATCHES_LISTED, MAX_ROWS_PER_BATCH } from "./hodhod-rules";
+import {
+  BATCH_SIZE_RANGE,
+  DEFAULT_BATCH_SIZE,
+  DEFAULT_MAX_RETRIES,
+  MAX_BATCHES_LISTED,
+  MAX_ROWS_PER_BATCH,
+  RETRIES_RANGE,
+  isIntegerInRange,
+} from "./hodhod-rules";
+import { loadConnectionSecret, sendSingleMessage } from "./hodhod.server";
 import { prepareMessages } from "./message-prep";
 
 export const BATCH_COLUMNS =
@@ -190,6 +199,68 @@ export async function reportResults(ctx: AuthedContext, batchId: string, body: u
     .single();
   if (updError || !refreshed) throw new ApiError(500, "server_error", "تعذر تحديث الدفعة.");
   return { updated, ignored: parsed.data.results.length - updated, batch: refreshed };
+}
+
+const sendSchema = z.object({ connection_id: z.string().uuid() });
+
+/**
+ * Sends the next chunk of pending messages through one of the caller's gateway connections
+ * (chunk size and retries come from the caller's sending preferences). Call again until remaining is 0.
+ */
+export async function sendViaGateway(ctx: AuthedContext, batchId: string, body: unknown) {
+  if (!uuidSchema.safeParse(batchId).success) throw new ApiError(404, "not_found", "الدفعة غير موجودة.");
+  const parsed = sendSchema.safeParse(body);
+  if (!parsed.success) throw new ApiError(400, "bad_request", "اختر بوابة الاتصالات (connection_id).");
+  const { supabase, userId } = ctx;
+
+  const { data: batch } = await supabase.from("message_batches").select("id").eq("id", batchId).maybeSingle();
+  if (!batch) throw new ApiError(404, "not_found", "الدفعة غير موجودة.");
+
+  const conn = await loadConnectionSecret(userId, parsed.data.connection_id);
+  if (!conn) throw new ApiError(404, "not_found", "بوابة الاتصالات غير موجودة.");
+
+  const { data: prefs } = await supabase
+    .from("gateway_settings")
+    .select("batch_size, max_retries")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const chunkSize =
+    prefs && isIntegerInRange(prefs.batch_size, BATCH_SIZE_RANGE) ? prefs.batch_size : DEFAULT_BATCH_SIZE;
+  const retries = prefs && isIntegerInRange(prefs.max_retries, RETRIES_RANGE) ? prefs.max_retries : DEFAULT_MAX_RETRIES;
+
+  const { data: pending, error } = await supabase
+    .from("prepared_messages")
+    .select("id, phone, body")
+    .eq("batch_id", batchId)
+    .eq("status", "pending")
+    .order("position", { ascending: true })
+    .limit(chunkSize);
+  if (error) throw new ApiError(500, "server_error", "تعذر تحميل الرسائل.");
+
+  const results = await Promise.all(
+    (pending ?? []).map(async (m) => {
+      if (!m.phone) return { id: m.id, status: "failed" as const, error: "رقم الجوال مفقود" };
+      let lastError = "فشل الإرسال";
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        const res = await sendSingleMessage(conn.endpoint_url, conn.api_key, conn.sender_name, m.phone, m.body);
+        if (res.success) return { id: m.id, status: "sent" as const };
+        lastError = res.error ?? lastError;
+      }
+      return { id: m.id, status: "failed" as const, error: lastError.slice(0, 500) };
+    }),
+  );
+
+  if (results.length === 0) {
+    const current = await getBatch(ctx, batchId, "pending");
+    return { sent: 0, failed: 0, remaining: 0, batch: current.batch };
+  }
+  const report = await reportResults(ctx, batchId, { results });
+  return {
+    sent: results.filter((r) => r.status === "sent").length,
+    failed: results.filter((r) => r.status === "failed").length,
+    remaining: report.batch.ready_count,
+    batch: report.batch,
+  };
 }
 
 async function countStatuses({ supabase }: AuthedContext, batchId: string) {

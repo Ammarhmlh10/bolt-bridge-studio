@@ -18,6 +18,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedSendRouteImport } from './routes/_authenticated/send'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents.index'
@@ -28,6 +29,7 @@ import { Route as ApiPublicV1BatchesIndexRouteImport } from './routes/api/public
 import { Route as ApiPublicV1DocumentsParseRouteImport } from './routes/api/public/v1/documents/parse'
 import { Route as ApiPublicV1BatchesBatchIdIndexRouteImport } from './routes/api/public/v1/batches/$batchId/index'
 import { Route as ApiPublicV1BatchesBatchIdReportRouteImport } from './routes/api/public/v1/batches/$batchId/report'
+import { Route as ApiPublicV1BatchesBatchIdSendRouteImport } from './routes/api/public/v1/batches/$batchId/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +73,11 @@ const AuthenticatedCampaignsRoute = AuthenticatedCampaignsRouteImport.update({
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSendRoute = AuthenticatedSendRouteImport.update({
+  id: '/send',
+  path: '/send',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -128,6 +135,12 @@ const ApiPublicV1BatchesBatchIdReportRoute =
     path: '/api/public/v1/batches/$batchId/report',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicV1BatchesBatchIdSendRoute =
+  ApiPublicV1BatchesBatchIdSendRouteImport.update({
+    id: '/api/public/v1/batches/$batchId/send',
+    path: '/api/public/v1/batches/$batchId/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/send': typeof AuthenticatedSendRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
@@ -147,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
   '/api/public/v1/batches/': typeof ApiPublicV1BatchesIndexRoute
   '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId/send': typeof ApiPublicV1BatchesBatchIdSendRoute
   '/api/public/v1/batches/$batchId/': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -158,6 +173,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/send': typeof AuthenticatedSendRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
@@ -167,6 +183,7 @@ export interface FileRoutesByTo {
   '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
   '/api/public/v1/batches': typeof ApiPublicV1BatchesIndexRoute
   '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId/send': typeof ApiPublicV1BatchesBatchIdSendRoute
   '/api/public/v1/batches/$batchId': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRoutesById {
@@ -180,6 +197,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/send': typeof AuthenticatedSendRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/_authenticated/documents/$batchId': typeof AuthenticatedDocumentsBatchIdRoute
@@ -189,6 +207,7 @@ export interface FileRoutesById {
   '/api/public/v1/documents/parse': typeof ApiPublicV1DocumentsParseRoute
   '/api/public/v1/batches/': typeof ApiPublicV1BatchesIndexRoute
   '/api/public/v1/batches/$batchId/report': typeof ApiPublicV1BatchesBatchIdReportRoute
+  '/api/public/v1/batches/$batchId/send': typeof ApiPublicV1BatchesBatchIdSendRoute
   '/api/public/v1/batches/$batchId/': typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -202,6 +221,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/campaigns'
     | '/home'
+    | '/send'
     | '/settings'
     | '/templates'
     | '/documents/$batchId'
@@ -211,6 +231,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/documents/parse'
     | '/api/public/v1/batches/'
     | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId/send'
     | '/api/public/v1/batches/$batchId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -222,6 +243,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/campaigns'
     | '/home'
+    | '/send'
     | '/settings'
     | '/templates'
     | '/documents/$batchId'
@@ -231,6 +253,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/documents/parse'
     | '/api/public/v1/batches'
     | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId/send'
     | '/api/public/v1/batches/$batchId'
   id:
     | '__root__'
@@ -243,6 +266,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/campaigns'
     | '/_authenticated/home'
+    | '/_authenticated/send'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
     | '/_authenticated/documents/$batchId'
@@ -252,6 +276,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/documents/parse'
     | '/api/public/v1/batches/'
     | '/api/public/v1/batches/$batchId/report'
+    | '/api/public/v1/batches/$batchId/send'
     | '/api/public/v1/batches/$batchId/'
   fileRoutesById: FileRoutesById
 }
@@ -268,6 +293,7 @@ export interface RootRouteChildren {
   ApiPublicV1DocumentsParseRoute: typeof ApiPublicV1DocumentsParseRoute
   ApiPublicV1BatchesIndexRoute: typeof ApiPublicV1BatchesIndexRoute
   ApiPublicV1BatchesBatchIdReportRoute: typeof ApiPublicV1BatchesBatchIdReportRoute
+  ApiPublicV1BatchesBatchIdSendRoute: typeof ApiPublicV1BatchesBatchIdSendRoute
   ApiPublicV1BatchesBatchIdIndexRoute: typeof ApiPublicV1BatchesBatchIdIndexRoute
 }
 
@@ -334,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/send': {
+      id: '/_authenticated/send'
+      path: '/send'
+      fullPath: '/send'
+      preLoaderRoute: typeof AuthenticatedSendRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -406,12 +439,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1BatchesBatchIdReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/batches/$batchId/send': {
+      id: '/api/public/v1/batches/$batchId/send'
+      path: '/api/public/v1/batches/$batchId/send'
+      fullPath: '/api/public/v1/batches/$batchId/send'
+      preLoaderRoute: typeof ApiPublicV1BatchesBatchIdSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedSendRoute: typeof AuthenticatedSendRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedDocumentsBatchIdRoute: typeof AuthenticatedDocumentsBatchIdRoute
@@ -421,6 +462,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedSendRoute: AuthenticatedSendRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedDocumentsBatchIdRoute: AuthenticatedDocumentsBatchIdRoute,
@@ -443,6 +485,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicV1DocumentsParseRoute: ApiPublicV1DocumentsParseRoute,
   ApiPublicV1BatchesIndexRoute: ApiPublicV1BatchesIndexRoute,
   ApiPublicV1BatchesBatchIdReportRoute: ApiPublicV1BatchesBatchIdReportRoute,
+  ApiPublicV1BatchesBatchIdSendRoute: ApiPublicV1BatchesBatchIdSendRoute,
   ApiPublicV1BatchesBatchIdIndexRoute: ApiPublicV1BatchesBatchIdIndexRoute,
 }
 export const routeTree = rootRouteImport
