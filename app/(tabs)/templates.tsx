@@ -34,7 +34,7 @@ export default function TemplatesScreen() {
     load();
   }, [load]);
 
-  const handleSaved = (saved: MessageTemplate) => {
+  const handleSaved = (saved: MessageTemplate, mapping?: Record<string, string>) => {
     setTemplates((current) => {
       const exists = current.some((t) => t.id === saved.id);
       return exists
@@ -42,6 +42,11 @@ export default function TemplatesScreen() {
         : [saved, ...current];
     });
     setForm({ mode: 'closed' });
+    // If mapping was provided, you could save it to a separate table
+    // or use it to prepare messages immediately
+    if (mapping && Object.keys(mapping).length > 0) {
+      console.log('Template saved with column mapping:', mapping);
+    }
   };
 
   const handleDeleted = (id: string) => {
