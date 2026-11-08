@@ -102,7 +102,8 @@ async def parse_document(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Parse uploaded document (CSV/Excel) and detect columns
+    Parse uploaded document (CSV/Excel/PDF) and detect columns
+    Supported formats: CSV, Excel (.xlsx), PDF (.pdf)
     """
     try:
         parsed_doc = await parser.parse_file(file)
@@ -110,7 +111,7 @@ async def parse_document(
         
         return {
             "success": True,
-            "message": "تم تحليل الملف بنجاح",
+            "message": f"تم تحليل ملف {parsed_doc.source_type.upper()} بنجاح",
             "data": analysis
         }
     except ValueError as e:

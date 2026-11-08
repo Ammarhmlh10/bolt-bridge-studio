@@ -15,6 +15,7 @@ import {
   type DocumentAnalysis, 
   type VariableMapping 
 } from '@/lib/documentParser';
+import { uploadDocument } from '@/lib/api';
 
 type Props = {
   variables: string[];
@@ -56,14 +57,49 @@ export function DocumentImportModal({ variables, onMapped, onCancel }: Props) {
         return;
       }
 
-      const parsed = await parseDocumentFile(result.uri, result.name);
-      setDocument(parsed);
-      setStep('mapping');
+      // Convert data URL to File object for upload
+      const file = await dataUrlToFile(result.uri, result.name);
+      
+      // Upload to backend
+      const response = await uploadDocument(file);
+      if (response.success && response.data) {
+        const analysis = response.data;
+        
+        // Transform backend response to frontend format
+        const transformedDoc: DocumentAnalysis = {
+          columns: analysis.columns,
+          columnInfo: {},
+          rowCount: analysis.row_count,
+          fileName: analysis.source_name,
+        };
+        
+        // Create columnInfo from detected_fields
+        for (const field of analysis.detected_fields) {
+          transformedDoc.columnInfo[field.column_name] = {
+            name: field.column_name,
+            type: field.detected_type as any,
+            confidence: field.confidence,
+            sampleValues: field.sample_values,
+          };
+        }
+        
+        setDocument(transformedDoc);
+        setStep('mapping');
+      } else {
+        setError(response.message || 'تعذر تحليل الملف');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر تحليل الملف');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper to convert data URL to File
+  const dataUrlToFile = async (dataUrl: string, fileName: string): Promise<File> => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type });
   };
 
   const handleMappingChange = (variable: string, column: string) => {
@@ -93,7 +129,7 @@ export function DocumentImportModal({ variables, onMapped, onCancel }: Props) {
       
       <Text style={styles.stepTitle}>استيراد مستند</Text>
       <Text style={styles.stepDescription}>
-        اختر ملف CSV أو Excel يحتوي على بيانات العملاء
+        اختر ملف CSV، Excel، أو PDF يحتوي على بيانات العملاء
       </Text>
 
       {error && (

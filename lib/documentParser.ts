@@ -33,13 +33,14 @@ export type VariableMapping = {
 // For now, we'll create a simple file input handler
 // This can be replaced with: import * as DocumentPicker from 'expo-document-picker';
 
-export async function pickDocument(): Promise<{ uri: string; name: string } | null> {
+export async function pickDocument(): Promise<{ uri: string; name: string; type: string } | null> {
   // Create a hidden file input for web
   if (typeof window !== 'undefined') {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = '.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx';
+      // Support CSV, Excel, and PDF files
+      input.accept = '.csv,.xlsx,.xls,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf';
       
       input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
@@ -50,6 +51,7 @@ export async function pickDocument(): Promise<{ uri: string; name: string } | nu
             resolve({
               uri: reader.result as string,
               name: file.name,
+              type: file.type,
             });
           };
           reader.readAsDataURL(file);
