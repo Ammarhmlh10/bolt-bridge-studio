@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
 type Tab = { to: "/home" | "/campaigns" | "/templates" | "/settings"; label: string; Icon: LucideIcon };
 
 const TABS_START: Tab[] = [
-  { to: "/home", label: "الرئيسية", Icon: House },
+  { to: "/home", label: "القائمة الرئيسية", Icon: House },
   { to: "/campaigns", label: "الحملات", Icon: Megaphone },
 ];
 const TABS_END: Tab[] = [
@@ -44,40 +44,37 @@ function NavTab({ tab, active }: { tab: Tab; active: boolean }) {
       aria-current={active ? "page" : undefined}
       aria-label={tab.label}
       className={cn(
-        "flex flex-1 flex-col items-center gap-1 py-1 text-xs font-semibold transition-colors",
-        active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+        "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-xs font-semibold transition-colors",
+        active ? "bg-primary-soft text-primary" : "text-muted-foreground hover:text-foreground",
       )}
     >
-      <span className={cn("flex h-8 w-12 items-center justify-center rounded-full", active && "bg-primary-soft")}>
-        <tab.Icon className="size-[22px]" strokeWidth={2} />
-      </span>
-      <span className="truncate">{tab.label}</span>
+      <tab.Icon className="size-[22px] shrink-0" strokeWidth={2} />
+      <span className="w-full truncate text-center">{tab.label}</span>
     </Link>
   );
 }
 
 function BottomNav() {
   const { pathname } = useLocation();
+  const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 pb-[max(env(safe-area-inset-bottom),8px)]">
-      <div className="mx-auto max-w-xl px-3">
-        <div className="flex items-end rounded-[24px] border bg-card px-2 pb-2 pt-2 shadow-nav">
-          {TABS_START.map((t) => (
-            <NavTab key={t.to} tab={t} active={pathname === t.to} />
-          ))}
-          <div className="flex flex-1 justify-center">
-            <Link
-              to="/campaigns"
-              aria-label="زر الإرسال الرئيسي"
-              className="-mt-8 flex size-[60px] items-center justify-center rounded-full bg-brand-gradient text-primary-foreground shadow-fab ring-4 ring-background transition-transform active:scale-95"
-            >
-              <Send className="size-[26px]" strokeWidth={2} />
-            </Link>
-          </div>
-          {TABS_END.map((t) => (
-            <NavTab key={t.to} tab={t} active={pathname === t.to} />
-          ))}
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card shadow-nav" aria-label="التنقل في التطبيق">
+      <div className="mx-auto flex max-w-xl items-end gap-1 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2">
+        {TABS_START.map((t) => (
+          <NavTab key={t.to} tab={t} active={isActive(t.to)} />
+        ))}
+        <div className="flex flex-1 justify-center">
+          <Link
+            to="/send"
+            aria-label="إرسال من ملف"
+            className="-mt-9 flex size-[62px] items-center justify-center rounded-full bg-brand-gradient text-primary-foreground shadow-fab ring-[5px] ring-card transition-transform active:scale-95"
+          >
+            <Send className="size-[26px]" strokeWidth={2} />
+          </Link>
         </div>
+        {TABS_END.map((t) => (
+          <NavTab key={t.to} tab={t} active={isActive(t.to)} />
+        ))}
       </div>
     </nav>
   );

@@ -23,7 +23,7 @@ export const uuidSchema = z.string().uuid();
 export async function listTemplates({ supabase }: AuthedContext) {
   const { data, error } = await supabase
     .from("message_templates")
-    .select("id, title, body, updated_at")
+    .select("id, title, body, is_default, updated_at")
     .order("updated_at", { ascending: false });
   if (error) throw new ApiError(500, "server_error", "تعذر تحميل القوالب.");
   return data ?? [];

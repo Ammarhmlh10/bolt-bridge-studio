@@ -5,12 +5,25 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function PageHeader({ title, subtitle, brand }: { title: string; subtitle: string; brand?: boolean }) {
+export function PageHeader({
+  title,
+  subtitle,
+  brand,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  brand?: boolean;
+  action?: ReactNode;
+}) {
   return (
-    <header className="space-y-1 px-1">
-      {brand ? <p className="text-sm font-semibold text-primary">هدهد الفواتير</p> : null}
-      <h1 className="text-[28px] font-bold leading-tight text-foreground">{title}</h1>
-      <p className="text-[15px] leading-relaxed text-muted-foreground">{subtitle}</p>
+    <header className="-mx-4 -mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b bg-card px-5 pb-4 pt-6">
+      <div className="min-w-0 space-y-1">
+        {brand ? <p className="text-sm font-semibold text-primary">هدهد الفواتير</p> : null}
+        <h1 className="text-[28px] font-bold leading-tight text-foreground">{title}</h1>
+        {subtitle ? <p className="text-[15px] leading-relaxed text-muted-foreground">{subtitle}</p> : null}
+      </div>
+      {action ? <div className="shrink-0 pt-1">{action}</div> : null}
     </header>
   );
 }
